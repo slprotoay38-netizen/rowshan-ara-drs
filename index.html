@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRS 2026 Enterprise A4 Edition - Rowshan-Ara Secondary Girls' High School</title>
+    <!-- Supabase JS Client SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Kalpurush', Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; direction: ltr; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; text-align: center; font-size: 24px; }
+        .school-header { text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 15px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #3498db; color: white; border: none; padding: 12px 20px; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #2980b9; }
+        #status-msg { margin-top: 15px; text-align: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="school-header">
+        <h1>রওশন-আরা মাধ্যমিক বালিকা বিদ্যালয়</h1>
+        <p>মোড়েলগঞ্জ, বাগেরহাট | DRS 2026 Enterprise A4 Edition</p>
+    </div>
+
+    <div id="login-section">
+        <h3>সিস্টেম লগইন পোর্টাল</h3>
+        <div class="form-group">
+            <label>ইমেইল বা ইউজার আইডি:</label>
+            <input type="email" id="user-email" placeholder="example@school.edu.bd">
+        </div>
+        <div class="form-group">
+            <label>পাসওয়ার্ড:</label>
+            <input type="password" id="user-password" placeholder="********">
+        </div>
+        <button onclick="handleLogin()">লগইন করুন</button>
+        <p id="status-msg"></p>
+    </div>
+</div>
+
+<script>
+    // Supabase Configuration
+    const SUPABASE_URL = 'https://olpzkoqskwjpnhurtcnw.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'Sb_publishable_zcDTQb-eMY2HtCyfGppF_Q_Iw5cDwEM';
+    
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+    async function handleLogin() {
+        const email = document.getElementById('user-email').value;
+        const password = document.getElementById('user-password').value;
+        const statusMsg = document.getElementById('status-msg');
+
+        if(!email || !password) {
+            statusMsg.style.color = 'red';
+            statusMsg.innerText = 'দয়া করে ইমেইল এবং পাসওয়ার্ড দিন।';
+            return;
+        }
+
+        statusMsg.style.color = 'blue';
+        statusMsg.innerText = 'লগইন হচ্ছে...';
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            statusMsg.style.color = 'red';
+            statusMsg.innerText = 'লগইন ব্যর্থ হয়েছে: ' + error.message;
+        } else {
+            statusMsg.style.color = 'green';
+            statusMsg.innerText = 'লগইন সফল হয়েছে!';
+        }
+    }
+</script>
+
+</body>
+</html>
