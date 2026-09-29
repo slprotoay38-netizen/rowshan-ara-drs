@@ -1,82 +1,872 @@
-<!DOCTYPE html>
-<html lang="bn">
+<!doctype html>
+<html lang="bn" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRS 2026 Enterprise A4 Edition - Rowshan-Ara Secondary Girls' High School</title>
-    <!-- Supabase JS Client SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { font-family: 'Kalpurush', Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; direction: ltr; }
-        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; text-align: center; font-size: 24px; }
-        .school-header { text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 15px; margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { background: #3498db; color: white; border: none; padding: 12px 20px; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; }
-        button:hover { background: #2980b9; }
-        #status-msg { margin-top: 15px; text-align: center; font-weight: bold; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="DRS 2026 — Rowshan-Ara Secondary Girls' High School Management System">
+  <title>DRS 2026 — Rowshan-Ara Secondary Girls' High School</title>
+
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --surface:#fff;
+      --surface-2:#f8fafc;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#dbe3ee;
+      --primary:#2563eb;
+      --primary-2:#1d4ed8;
+      --success:#15803d;
+      --danger:#b91c1c;
+      --warning:#b45309;
+      --shadow:0 10px 28px rgba(15,23,42,.08);
+      --radius:14px;
+    }
+    html[data-theme="dark"]{
+      --bg:#0b1220;
+      --surface:#111827;
+      --surface-2:#172033;
+      --text:#f8fafc;
+      --muted:#94a3b8;
+      --border:#263244;
+      --primary:#60a5fa;
+      --primary-2:#3b82f6;
+      --success:#4ade80;
+      --danger:#f87171;
+      --warning:#f59e0b;
+      --shadow:0 10px 28px rgba(0,0,0,.24);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text)}
+    body{
+      font-family:system-ui,-apple-system,"Segoe UI","Noto Sans Bengali","Nirmala UI",Arial,sans-serif;
+      min-height:100vh;
+    }
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    a{color:var(--primary)}
+    .hidden{display:none!important}
+    .sr-only{
+      position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+      clip:rect(0,0,0,0);white-space:nowrap;border:0
+    }
+
+    /* ---------- Auth / public shell ---------- */
+    .public-shell{
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:24px 14px;
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.10), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(14,165,233,.10), transparent 30%),
+        var(--bg);
+    }
+    .auth-card{
+      width:min(100%, 720px);
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      padding:28px;
+    }
+    .brand-block{text-align:center;margin-bottom:22px}
+    .brand-block h1{
+      margin:0;
+      font-size:clamp(25px,5vw,38px);
+      line-height:1.2;
+    }
+    .brand-block p{margin:8px 0 0;color:var(--muted)}
+    .school-line{
+      margin-top:12px;
+      padding-top:12px;
+      border-top:1px solid var(--border);
+      font-size:14px;
+    }
+    .auth-title{margin:0 0 14px;font-size:22px}
+    .form-group{margin:14px 0}
+    label{display:block;margin-bottom:6px;font-weight:700}
+    input,select,textarea{
+      width:100%;
+      border:1px solid var(--border);
+      background:var(--surface);
+      color:var(--text);
+      border-radius:10px;
+      padding:12px 13px;
+      outline:none;
+    }
+    input:focus,select:focus,textarea:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 3px rgba(37,99,235,.12);
+    }
+    .input-row{display:grid;grid-template-columns:1fr auto;gap:8px}
+    .btn{
+      border:1px solid var(--border);
+      background:var(--surface);
+      color:var(--text);
+      border-radius:10px;
+      padding:11px 14px;
+      min-height:44px;
+    }
+    .btn:hover{background:var(--surface-2)}
+    .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+    .btn.primary:hover{background:var(--primary-2);border-color:var(--primary-2)}
+    .btn.danger{color:#fff;background:var(--danger);border-color:var(--danger)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .status{
+      margin-top:14px;padding:12px 14px;border:1px solid var(--border);
+      border-radius:10px;background:var(--surface-2);min-height:46px;
+    }
+    .status.success{border-color:#bbf7d0;color:var(--success)}
+    .status.error{border-color:#fecaca;color:var(--danger)}
+    .status.warning{border-color:#fde68a;color:var(--warning)}
+    .security-note{
+      margin-top:16px;padding:12px 14px;border-radius:10px;
+      background:var(--surface-2);border:1px solid var(--border);
+      font-size:13px;color:var(--muted);
+    }
+
+    /* ---------- App shell ---------- */
+    .app-shell{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:280px 1fr;
+    }
+    .sidebar{
+      position:sticky;top:0;height:100vh;overflow:auto;
+      background:var(--surface);border-right:1px solid var(--border);
+      padding:18px 14px;
+    }
+    .sidebar-brand{padding:8px 10px 16px;border-bottom:1px solid var(--border);margin-bottom:12px}
+    .sidebar-brand strong{display:block;font-size:19px}
+    .sidebar-brand small{display:block;margin-top:4px;color:var(--muted)}
+    .nav-label{
+      margin:16px 10px 6px;color:var(--muted);font-size:12px;
+      font-weight:800;text-transform:uppercase;letter-spacing:.04em
+    }
+    .nav-btn{
+      width:100%;display:flex;gap:10px;align-items:center;
+      border:0;background:transparent;color:var(--text);
+      text-align:left;border-radius:10px;padding:11px 12px;margin:2px 0
+    }
+    .nav-btn:hover,.nav-btn:focus-visible{background:var(--surface-2);outline:none}
+    .nav-btn.active{background:rgba(37,99,235,.11);color:var(--primary)}
+    .nav-btn .icon{width:24px;text-align:center;flex:0 0 24px}
+    .nav-btn[disabled]{opacity:.45;cursor:not-allowed}
+    .main{min-width:0;padding:18px 20px 28px}
+    .topbar{
+      display:flex;gap:10px;align-items:center;justify-content:space-between;
+      position:sticky;top:0;z-index:20;padding:6px 0 12px;
+      background:color-mix(in srgb,var(--bg) 88%,transparent);
+      backdrop-filter:blur(10px)
+    }
+    .topbar-left,.topbar-right{display:flex;align-items:center;gap:8px}
+    .search{width:min(460px,58vw)}
+    .icon-btn{
+      border:1px solid var(--border);background:var(--surface);color:var(--text);
+      border-radius:10px;min-width:42px;height:42px
+    }
+    .page-head{
+      display:flex;justify-content:space-between;gap:16px;align-items:flex-start;
+      margin-bottom:16px
+    }
+    .page-head h2{margin:0;font-size:clamp(24px,4vw,34px)}
+    .page-head p{margin:5px 0 0;color:var(--muted)}
+    .role-pill{
+      border:1px solid var(--border);background:var(--surface);
+      border-radius:999px;padding:8px 12px;font-size:13px
+    }
+    .banner{
+      border:1px solid var(--border);background:var(--surface);border-radius:12px;
+      padding:12px 14px;margin-bottom:16px
+    }
+    .banner.warning{border-color:#fde68a}
+    .grid{
+      display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px
+    }
+    .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .card{
+      min-width:0;background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius);box-shadow:var(--shadow);padding:16px
+    }
+    .card h3{margin:0 0 8px;font-size:17px}
+    .metric{font-size:28px;font-weight:800}
+    .muted{color:var(--muted)}
+    .section-title{font-size:19px;margin:24px 0 12px}
+    .module-card{min-height:166px;display:flex;flex-direction:column;justify-content:space-between}
+    .module-card .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .module-card .btn{min-height:40px}
+    .empty{
+      min-height:150px;display:grid;place-items:center;text-align:center;
+      background:var(--surface-2);border-radius:10px;padding:16px;color:var(--muted)
+    }
+    .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:10px}
+    table{width:100%;border-collapse:collapse;min-width:640px}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left}
+    th{background:var(--surface-2)}
+    tr:last-child td{border-bottom:0}
+    .footer{
+      margin-top:28px;padding:18px 4px 6px;border-top:1px solid var(--border);
+      color:var(--muted);font-size:13px
+    }
+
+    /* ---------- Module views ---------- */
+    .view{display:none}
+    .view.active{display:block}
+    .toolbar{
+      display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+      margin-bottom:14px
+    }
+    .toolbar .grow{flex:1}
+    .state-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .state{
+      padding:7px 10px;border-radius:999px;background:var(--surface-2);
+      border:1px solid var(--border);font-size:12px
+    }
+    .state.active{border-color:var(--primary);color:var(--primary)}
+    .notice{
+      border-left:4px solid var(--primary);background:var(--surface-2);
+      padding:12px 14px;border-radius:0 10px 10px 0
+    }
+
+    @media(max-width:1100px){
+      .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .app-shell{grid-template-columns:230px 1fr}
+    }
+    @media(max-width:760px){
+      .app-shell{display:block}
+      .sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid var(--border)}
+      .main{padding:12px 12px 24px}
+      .topbar{position:static;flex-wrap:wrap}
+      .search{width:100%}
+      .topbar-left{width:100%}
+      .page-head{flex-direction:column}
+      .grid,.grid-3,.grid-2{grid-template-columns:1fr}
+      .auth-card{padding:20px}
+    }
+
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+    }
+
+    @media print{
+      .sidebar,.topbar,.footer,.no-print{display:none!important}
+      .main{padding:0}
+      body{background:#fff;color:#000}
+    }
+  </style>
 </head>
+
 <body>
-
-<div class="container">
-    <div class="school-header">
-        <h1>রওশন-আরা মাধ্যমিক বালিকা বিদ্যালয়</h1>
-        <p>মোড়েলগঞ্জ, বাগেরহাট | DRS 2026 Enterprise A4 Edition</p>
-    </div>
-
-    <div id="login-section">
-        <h3>সিস্টেম লগইন পোর্টাল</h3>
-        <div class="form-group">
-            <label>ইমেইল বা ইউজার আইডি:</label>
-            <input type="email" id="user-email" placeholder="example@school.edu.bd">
+  <!-- ========================= PUBLIC / LOGIN ========================= -->
+  <section id="public-shell" class="public-shell">
+    <div class="auth-card">
+      <div class="brand-block">
+        <h1>রওশন-আরা মাধ্যমিক বালিকা বিদ্যালয়</h1>
+        <p>মোরেলগঞ্জ, বাগেরহাট</p>
+        <div class="school-line">
+          School Management System
         </div>
-        <div class="form-group">
-            <label>পাসওয়ার্ড:</label>
-            <input type="password" id="user-password" placeholder="********">
-        </div>
-        <button onclick="handleLogin()">লগইন করুন</button>
-        <p id="status-msg"></p>
-    </div>
-</div>
+      </div>
 
-<script>
-    // Supabase Configuration
+      <form id="login-form" novalidate>
+        <h2 class="auth-title">সিস্টেম লগইন পোর্টাল</h2>
+
+        <div class="form-group">
+          <label for="user-email">ইমেইল / ইউজার আইডি</label>
+          <input id="user-email" name="email" type="email"
+                 autocomplete="username" inputmode="email"
+                 placeholder="example@school.edu.bd" required>
+        </div>
+
+        <div class="form-group">
+          <label for="user-password">পাসওয়ার্ড</label>
+          <div class="input-row">
+            <input id="user-password" name="password" type="password"
+                   autocomplete="current-password" placeholder="••••••••" required>
+            <button id="toggle-password" class="btn" type="button"
+                    aria-label="পাসওয়ার্ড দেখান">দেখুন</button>
+          </div>
+        </div>
+
+        <button id="login-btn" class="btn primary" type="submit" style="width:100%">
+          লগইন করুন
+        </button>
+
+        <div id="login-status" class="status" role="status" aria-live="polite">
+          লগইনের জন্য আপনার অনুমোদিত account ব্যবহার করুন।
+        </div>
+
+        <div class="security-note">
+          <strong>নিরাপত্তা:</strong> এই client শুধু authenticated session তৈরি করে।
+          বর্তমান role/permission client-side JWT/metadata থেকে অনুমান করা হবে না।
+          Protected access-এর জন্য server/database authority প্রয়োজন।
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ========================= AUTHENTICATED APP ========================= -->
+  <section id="app-shell" class="app-shell hidden">
+    <aside class="sidebar" aria-label="প্রধান নেভিগেশন">
+      <div class="sidebar-brand">
+        <strong>DRS 2026</strong>
+        <small>Rowshan-Ara Secondary Girls' High School</small>
+      </div>
+
+      <div class="nav-label">Core</div>
+      <button class="nav-btn active" data-view="dashboard"><span class="icon">⌂</span>ড্যাশবোর্ড</button>
+      <button class="nav-btn" data-view="students"><span class="icon">👤</span>Student 360°</button>
+      <button class="nav-btn" data-view="attendance"><span class="icon">✓</span>Attendance</button>
+      <button class="nav-btn" data-view="exams"><span class="icon">▣</span>Exams & Results</button>
+      <button class="nav-btn" data-view="payments"><span class="icon">৳</span>Payments</button>
+      <button class="nav-btn" data-view="documents"><span class="icon">▤</span>Documents & QR</button>
+      <button class="nav-btn" data-view="notifications"><span class="icon">🔔</span>Notifications</button>
+
+      <div class="nav-label">Operations</div>
+      <button class="nav-btn" data-view="admission"><span class="icon">＋</span>Admission</button>
+      <button class="nav-btn" data-view="bulk"><span class="icon">⇅</span>Bulk Import / Demo</button>
+      <button class="nav-btn" data-view="routine"><span class="icon">◫</span>Routine Builder</button>
+
+      <div class="nav-label">Privileged</div>
+      <button class="nav-btn" data-view="security"><span class="icon">🔐</span>Security Center</button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <label class="sr-only" for="global-search">সার্চ</label>
+          <input id="global-search" class="search" type="search"
+                 placeholder="সার্চ / Ctrl+K" autocomplete="off">
+        </div>
+        <div class="topbar-right">
+          <button id="theme-toggle" class="icon-btn" type="button" aria-label="থিম">☾</button>
+          <button id="lang-toggle" class="icon-btn" type="button" aria-label="ভাষা">EN</button>
+          <button id="logout-btn" class="icon-btn" type="button" aria-label="লগআউট">⇥</button>
+        </div>
+      </header>
+
+      <div class="page-head">
+        <div>
+          <h2 id="page-title">ড্যাশবোর্ড</h2>
+          <p id="page-subtitle">সেশন ও বর্তমান access state যাচাই হচ্ছে…</p>
+        </div>
+        <div class="role-pill">
+          Role: <strong id="role-display">verifying…</strong>
+        </div>
+      </div>
+
+      <div id="app-status" class="banner warning" role="status" aria-live="polite">
+        Authenticated session যাচাই হয়েছে; server-authoritative role/scope contract সংযুক্ত না হওয়া পর্যন্ত privileged actions fail-closed থাকবে।
+      </div>
+
+      <!-- ================= DASHBOARD ================= -->
+      <section class="view active" id="view-dashboard">
+        <div class="grid">
+          <article class="card">
+            <h3>Students</h3>
+            <div class="metric">—</div>
+            <div class="muted">Real server data required</div>
+          </article>
+          <article class="card">
+            <h3>Attendance</h3>
+            <div class="metric">—</div>
+            <div class="muted">No fabricated production KPI</div>
+          </article>
+          <article class="card">
+            <h3>Pending Reviews</h3>
+            <div class="metric">—</div>
+            <div class="muted">Awaiting authorized backend query</div>
+          </article>
+          <article class="card">
+            <h3>Payments</h3>
+            <div class="metric">—</div>
+            <div class="muted">Financial values stay server-authoritative</div>
+          </article>
+        </div>
+
+        <h3 class="section-title">Core Modules</h3>
+        <div class="grid grid-3">
+          <article class="card module-card">
+            <div><h3>Student 360°</h3><p class="muted">Multi-year academic, attendance, payment and promotion history with scope controls.</p></div>
+            <div class="actions"><button class="btn" data-open-view="students">Open</button></div>
+          </article>
+          <article class="card module-card">
+            <div><h3>Attendance</h3><p class="muted">Daily + subject-wise attendance with independent authorization scopes.</p></div>
+            <div class="actions"><button class="btn" data-open-view="attendance">Open</button></div>
+          </article>
+          <article class="card module-card">
+            <div><h3>Exams & Results</h3><p class="muted">Draft → Review → Publish → Lock, with policy-gated transitions.</p></div>
+            <div class="actions"><button class="btn" data-open-view="exams">Open</button></div>
+          </article>
+          <article class="card module-card">
+            <div><h3>Payments</h3><p class="muted">Gateway + Cash Receive, idempotency and audited payment lifecycle.</p></div>
+            <div class="actions"><button class="btn" data-open-view="payments">Open</button></div>
+          </article>
+          <article class="card module-card">
+            <div><h3>Documents & QR</h3><p class="muted">Official document generation/verification with server-authoritative canonical data.</p></div>
+            <div class="actions"><button class="btn" data-open-view="documents">Open</button></div>
+          </article>
+          <article class="card module-card">
+            <div><h3>Notifications</h3><p class="muted">In-app → Web Push → Email → optional channels; never blocks Core transactions.</p></div>
+            <div class="actions"><button class="btn" data-open-view="notifications">Open</button></div>
+          </article>
+        </div>
+
+        <h3 class="section-title">System Health</h3>
+        <div class="card">
+          <div class="empty">
+            System health is observer-only. Provider/database state remains authoritative and is not replaced by this UI.
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= STUDENT 360 ================= -->
+      <section class="view" id="view-students">
+        <div class="toolbar">
+          <input id="student-search" class="grow" type="search"
+                 placeholder="নাম / নির্ধারিত আইডি দিয়ে খুঁজুন">
+          <button class="btn" disabled>Search</button>
+        </div>
+        <div class="card">
+          <h3>Student 360° Profile</h3>
+          <p class="muted">Academic + attendance + payments + promotion history এখানে দেখানো হবে কেবল authorized server query-এর ফল হিসেবে। Teacher scope বর্তমান academic year + class + section + subject-এর বাইরে historical data পাবে না।</p>
+          <div class="empty">Backend query/RLS contract এখনো সংযুক্ত হয়নি। কোনো mock student record দেখানো হচ্ছে না।</div>
+        </div>
+      </section>
+
+      <!-- ================= ATTENDANCE ================= -->
+      <section class="view" id="view-attendance">
+        <div class="state-strip">
+          <span class="state active">Daily</span>
+          <span class="state">Subject-wise</span>
+          <span class="state">Draft</span>
+          <span class="state">Published</span>
+          <span class="state">Correction</span>
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Class Daily Attendance</h3>
+            <p class="muted">Authorized only through the designated class-teacher scope:</p>
+            <code>academic_year + class + section + designated_class_teacher</code>
+          </div>
+          <div class="card">
+            <h3>Subject Attendance</h3>
+            <p class="muted">Authorized only through the assigned-subject scope:</p>
+            <code>academic_year + class + section + subject</code>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="notice">Published attendance must be locked; corrections follow Original → Correction → Reason → Actor → Timestamp → Approval → Audit.</div>
+          <div class="empty" style="margin-top:12px">Attendance backend/RLS/RPC এখনো সংযুক্ত হয়নি।</div>
+        </div>
+      </section>
+
+      <!-- ================= EXAMS ================= -->
+      <section class="view" id="view-exams">
+        <div class="state-strip">
+          <span class="state active">Draft</span>
+          <span class="state">Review</span>
+          <span class="state">Publish</span>
+          <span class="state">Lock</span>
+        </div>
+        <div class="card">
+          <h3>Examination & Result Workflow</h3>
+          <p>Final Submit → Review. Pre-Publish resubmission replaces only the pending submission artifact while preserving the superseded change in audit. Published/Locked data uses the formal correction workflow.</p>
+          <div class="notice">Transition-authority matrix is an open institutional policy decision. This UI will not invent who may perform Draft → Review, Review → Publish, or Publish → Lock.</div>
+          <div class="empty" style="margin-top:12px">Academic engine + transition RPC + RLS are not yet connected.</div>
+        </div>
+      </section>
+
+      <!-- ================= PAYMENTS ================= -->
+      <section class="view" id="view-payments">
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Online Gateway</h3>
+            <p class="muted">Provider reference + internal transaction ID + duplicate settlement prevention.</p>
+            <button class="btn" disabled>Gateway payment</button>
+          </div>
+          <div class="card">
+            <h3>Cash Receive</h3>
+            <p class="muted">Online/server-authoritative final commit; no financial draft is persisted in browser storage.</p>
+            <button class="btn" disabled>Cash receive</button>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="notice">Refund/reversal/chargeback remains out of Core until an approved institutional policy exists.</div>
+          <div class="empty" style="margin-top:12px">Payment tables/RPC/RLS/provider callbacks are not yet connected.</div>
+        </div>
+      </section>
+
+      <!-- ================= DOCUMENTS ================= -->
+      <section class="view" id="view-documents">
+        <div class="card">
+          <h3>Official Documents & QR Verification</h3>
+          <div class="grid grid-2">
+            <div>
+              <p class="muted">Official marksheets/admit cards are Core capabilities.</p>
+              <ul>
+                <li>Canonical server-authoritative payload</li>
+                <li>Document registry + unique document ID + hash</li>
+                <li>Opaque public verification identifier</li>
+                <li>QR as enhancement, not hard dependency</li>
+                <li>Server-side cryptographic signing</li>
+              </ul>
+            </div>
+            <div>
+              <p class="muted">Public verification exposes only minimum necessary information.</p>
+              <button class="btn" disabled>Verify document</button>
+            </div>
+          </div>
+          <div class="empty">Official document generation + verification backend is not yet connected.</div>
+        </div>
+      </section>
+
+      <!-- ================= NOTIFICATIONS ================= -->
+      <section class="view" id="view-notifications">
+        <div class="grid">
+          <article class="card"><h3>In-app</h3><p class="muted">Primary $0 channel.</p></article>
+          <article class="card"><h3>Web Push</h3><p class="muted">Browser-native $0 channel.</p></article>
+          <article class="card"><h3>Email</h3><p class="muted">Resend free quota, verified at implementation time.</p></article>
+          <article class="card"><h3>SMS / WhatsApp</h3><p class="muted">Optional/provider-dependent fallback channels.</p></article>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="notice">Notification failure must never block the underlying Core transaction.</div>
+          <div class="empty" style="margin-top:12px">Notification queue / Edge Function / Web Push subscription storage are not yet connected.</div>
+        </div>
+      </section>
+
+      <!-- ================= ADMISSION ================= -->
+      <section class="view" id="view-admission">
+        <div class="card">
+          <h3>Admission</h3>
+          <p class="muted">Institutional admission rules, girls-only eligibility, religion-locking and ID-generation rules must be enforced server-side.</p>
+          <div class="empty">Admission forms/RPC/RLS are not yet connected.</div>
+        </div>
+      </section>
+
+      <!-- ================= BULK ================= -->
+      <section class="view" id="view-bulk">
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Bulk Import</h3>
+            <p class="muted">Chunked SheetJS parsing → row validation → staging → atomic execution → audit.</p>
+            <button class="btn" disabled>Select XLSX</button>
+          </div>
+          <div class="card">
+            <h3>Demo Mode</h3>
+            <p class="muted">Strictly isolated from production data, metrics, financial records, academic results, documents and audit history.</p>
+            <button class="btn" disabled>Enter Demo Mode</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ROUTINE ================= -->
+      <section class="view" id="view-routine">
+        <div class="card">
+          <h3>Routine Builder</h3>
+          <p class="muted">Admin-only scheduling with database-enforced conflict prevention for teacher/room/class/duplicate-slot conflicts.</p>
+          <div class="empty">Routine/assignment schema + transactional conflict protection are not yet connected.</div>
+        </div>
+      </section>
+
+      <!-- ================= SECURITY ================= -->
+      <section class="view" id="view-security">
+        <div class="card">
+          <h3>Security Center</h3>
+          <p class="muted">Super Admin only after authoritative backend role verification and required AAL2 assurance.</p>
+          <div class="grid grid-2">
+            <div class="card">
+              <h3>Security Settings</h3>
+              <p class="muted">MFA/AAL2, privileged authorization and application-configured rate limits.</p>
+              <button class="btn" disabled>Open settings</button>
+            </div>
+            <div class="card">
+              <h3>System Health</h3>
+              <p class="muted">Observer-only provider/infrastructure status.</p>
+              <button class="btn" disabled>View health</button>
+            </div>
+          </div>
+          <div class="notice" style="margin-top:12px">Service-role/secret credentials must remain server-side. This frontend never receives a secret key.</div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div>© DRS 2026 · রওশন-আরা মাধ্যমিক বালিকা বিদ্যালয় · মোরেলগঞ্জ, বাগেরহাট</div>
+        <div>Developer: S. L. Protoay Kumar Halder · Assistant Teacher, ICT · Index N56913462</div>
+      </footer>
+    </main>
+  </section>
+
+  <script>
+    /* ============================================================
+       DRS 2026 — Supabase client
+       Publishable key is intended for client-side use.
+       Never place service_role / sb_secret_* in this file.
+       ============================================================ */
     const SUPABASE_URL = 'https://olpzkoqskwjpnhurtcnw.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'Sb_publishable_zcDTQb-eMY2HtCyfGppF_Q_Iw5cDwEM';
-    
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-    async function handleLogin() {
-        const email = document.getElementById('user-email').value;
-        const password = document.getElementById('user-password').value;
-        const statusMsg = document.getElementById('status-msg');
+    const supabaseClient = supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
 
-        if(!email || !password) {
-            statusMsg.style.color = 'red';
-            statusMsg.innerText = 'দয়া করে ইমেইল এবং পাসওয়ার্ড দিন।';
-            return;
+    const $ = (id) => document.getElementById(id);
+
+    const PUBLIC_SHELL = $('public-shell');
+    const APP_SHELL = $('app-shell');
+    const LOGIN_FORM = $('login-form');
+    const LOGIN_BTN = $('login-btn');
+    const LOGIN_STATUS = $('login-status');
+    const APP_STATUS = $('app-status');
+
+    const PAGE_TITLES = {
+      dashboard: ['ড্যাশবোর্ড','সিস্টেমের সারসংক্ষেপ ও navigation'],
+      students: ['Student 360°','শিক্ষার্থীর scope-controlled unified profile'],
+      attendance: ['Attendance','Daily ও Subject-wise attendance'],
+      exams: ['Exams & Results','Draft → Review → Publish → Lock'],
+      payments: ['Payments','Online gateway ও Cash Receive'],
+      documents: ['Documents & QR','Official document generation ও verification'],
+      notifications: ['Notifications','In-app / Web Push / Email / optional channels'],
+      admission: ['Admission','Institutional admission workflow'],
+      bulk: ['Bulk Import / Demo','Chunked import ও isolated Demo Mode'],
+      routine: ['Routine Builder','Assignment ও conflict-safe scheduling'],
+      security: ['Security Center','Privileged security controls / observer-only health']
+    };
+
+    function showPublic() {
+      PUBLIC_SHELL.classList.remove('hidden');
+      APP_SHELL.classList.add('hidden');
+    }
+
+    function showApp() {
+      PUBLIC_SHELL.classList.add('hidden');
+      APP_SHELL.classList.remove('hidden');
+    }
+
+    function setLoginStatus(message, kind='') {
+      LOGIN_STATUS.textContent = message;
+      LOGIN_STATUS.className = `status ${kind}`.trim();
+    }
+
+    function setAppStatus(message, kind='warning') {
+      APP_STATUS.textContent = message;
+      APP_STATUS.className = `banner ${kind}`.trim();
+    }
+
+    async function requireCurrentUser() {
+      /*
+        This calls the Auth server to confirm current account state.
+        Role/scope is deliberately NOT inferred from JWT claims or local storage.
+        Actual role resolution must use the verified Postgres/RLS/RPC contract
+        once the project's backend schema is available.
+      */
+      const { data, error } = await supabaseClient.auth.getUser();
+      if (error || !data.user) {
+        return null;
+      }
+      return data.user;
+    }
+
+    async function bootstrapApp() {
+      const user = await requireCurrentUser();
+
+      if (!user) {
+        showPublic();
+        return;
+      }
+
+      showApp();
+
+      $('page-subtitle').textContent =
+        `Authenticated: ${user.email || 'verified account'}`;
+
+      $('role-display').textContent = 'Server verification required';
+
+      setAppStatus(
+        'সেশন বৈধ। কিন্তু Postgres/RLS/RPC থেকে current role ও scope যাচাই না হওয়া পর্যন্ত কোনো privileged control client-side থেকে সক্রিয় করা হচ্ছে না।',
+        'warning'
+      );
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const view = btn.dataset.view;
+        if (view && view !== 'dashboard') {
+          btn.disabled = true;
         }
+      });
 
-        statusMsg.style.color = 'blue';
-        statusMsg.innerText = 'লগইন হচ্ছে...';
+      activateView('dashboard');
+    }
 
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password,
+    function activateView(view) {
+      document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+      const target = document.getElementById(`view-${view}`);
+      const button = document.querySelector(`.nav-btn[data-view="${view}"]`);
+
+      if (!target) return;
+
+      target.classList.add('active');
+      if (button) button.classList.add('active');
+
+      const [title, subtitle] = PAGE_TITLES[view] || PAGE_TITLES.dashboard;
+      $('page-title').textContent = title;
+      $('page-subtitle').textContent = subtitle;
+
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    /* ---------- Login ---------- */
+    LOGIN_FORM.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const email = $('user-email').value.trim();
+      const password = $('user-password').value;
+
+      if (!email || !password) {
+        setLoginStatus('দয়া করে ইমেইল এবং পাসওয়ার্ড দিন।', 'error');
+        return;
+      }
+
+      LOGIN_BTN.disabled = true;
+      setLoginStatus('লগইন হচ্ছে…', '');
+
+      try {
+        const { error } = await supabaseClient.auth.signInWithPassword({
+          email,
+          password
         });
 
         if (error) {
-            statusMsg.style.color = 'red';
-            statusMsg.innerText = 'লগইন ব্যর্থ হয়েছে: ' + error.message;
-        } else {
-            statusMsg.style.color = 'green';
-            statusMsg.innerText = 'লগইন সফল হয়েছে!';
+          setLoginStatus(`লগইন ব্যর্থ হয়েছে: ${error.message}`, 'error');
+          return;
         }
-    }
-</script>
 
+        setLoginStatus('লগইন সফল হয়েছে। সিস্টেম যাচাই হচ্ছে…', 'success');
+        await bootstrapApp();
+      } catch (error) {
+        console.error(error);
+        setLoginStatus('লগইন প্রক্রিয়ায় একটি অনাকাঙ্ক্ষিত সমস্যা হয়েছে।', 'error');
+      } finally {
+        LOGIN_BTN.disabled = false;
+      }
+    });
+
+    /* ---------- Password visibility ---------- */
+    $('toggle-password').addEventListener('click', () => {
+      const input = $('user-password');
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      $('toggle-password').textContent = isPassword ? 'লুকান' : 'দেখুন';
+      $('toggle-password').setAttribute(
+        'aria-label',
+        isPassword ? 'পাসওয়ার্ড লুকান' : 'পাসওয়ার্ড দেখান'
+      );
+    });
+
+    /* ---------- Navigation ---------- */
+    document.querySelectorAll('.nav-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        if (button.disabled) return;
+        activateView(button.dataset.view);
+      });
+    });
+
+    document.querySelectorAll('[data-open-view]').forEach(button => {
+      button.addEventListener('click', () => {
+        const view = button.dataset.openView;
+        const targetButton = document.querySelector(`.nav-btn[data-view="${view}"]`);
+        if (!targetButton || targetButton.disabled) {
+          setAppStatus(
+            'এই module এখনো server-authoritative role/scope verification-এর পরে সক্রিয় করা হয়নি।',
+            'warning'
+          );
+          return;
+        }
+        activateView(view);
+      });
+    });
+
+    /* ---------- Logout ---------- */
+    $('logout-btn').addEventListener('click', async () => {
+      $('logout-btn').disabled = true;
+      const { error } = await supabaseClient.auth.signOut();
+
+      if (error) {
+        setAppStatus('লগআউট সম্পন্ন করা যায়নি।', 'warning');
+        $('logout-btn').disabled = false;
+        return;
+      }
+
+      window.location.replace('./index.html');
+    });
+
+    /* ---------- Theme ---------- */
+    function applyTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      localStorage.setItem('drs-theme', theme);
+      $('theme-toggle').textContent = theme === 'dark' ? '☀' : '☾';
+    }
+
+    $('theme-toggle').addEventListener('click', () => {
+      const current = document.documentElement.dataset.theme || 'light';
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+
+    /* ---------- Language toggle (UI shell only) ---------- */
+    $('lang-toggle').addEventListener('click', () => {
+      $('lang-toggle').textContent =
+        $('lang-toggle').textContent === 'EN' ? 'বাং' : 'EN';
+    });
+
+    /* ---------- Command/search focus ---------- */
+    function focusGlobalSearch() {
+      $('global-search').focus();
+    }
+
+    $('global-search').addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        event.target.value = '';
+      }
+    });
+
+    window.addEventListener('keydown', event => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        focusGlobalSearch();
+      }
+    });
+
+    /* ---------- Auth state listener ---------- */
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        if (PUBLIC_SHELL.classList.contains('hidden')) return;
+        await bootstrapApp();
+      } else {
+        showPublic();
+      }
+    });
+
+    /* ---------- Initial theme + session bootstrap ---------- */
+    const savedTheme = localStorage.getItem('drs-theme');
+    applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
+
+    bootstrapApp().catch(error => {
+      console.error(error);
+      showPublic();
+      setLoginStatus(
+        'সিস্টেম শুরু করা যায়নি। দয়া করে আবার চেষ্টা করুন।',
+        'error'
+      );
+    });
+  </script>
 </body>
 </html>
