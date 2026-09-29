@@ -8,6 +8,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <style>
+    /* ============================================================
+       CSS SECTION — পুরো Dashboard-এর বাহিরের/ভিজ্যুয়াল ডিজাইন
+       ============================================================ */
+    /* ---------- Light Theme Variables ---------- */
     :root {
       --bg: #f1f5f9;
       --surface: #ffffff;
@@ -20,6 +24,7 @@
       --success: #15803d;
       --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
     }
+    /* ---------- Dark Theme Variables ---------- */
     [data-theme="dark"] {
       --bg: #0b1220;
       --surface: #111827;
@@ -42,11 +47,13 @@
     }
     button, input { font: inherit; }
     button { cursor: pointer; }
+    /* ---------- Main Application Layout ---------- */
     .app {
       min-height: 100vh;
       display: grid;
       grid-template-columns: 280px 1fr;
     }
+    /* ---------- Left Sidebar / Navigation ---------- */
     .sidebar {
       position: sticky;
       top: 0;
@@ -56,6 +63,7 @@
       border-right: 1px solid var(--border);
       padding: 20px 16px;
     }
+    /* ---------- School / System Branding ---------- */
     .brand {
       padding: 8px 10px 18px;
       border-bottom: 1px solid var(--border);
@@ -63,6 +71,7 @@
     }
     .brand h1 { margin: 0; font-size: 20px; }
     .brand p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+    /* ---------- Navigation Groups ---------- */
     .nav-group { margin-top: 14px; }
     .nav-label {
       padding: 7px 10px;
@@ -88,10 +97,12 @@
     .nav-btn:hover, .nav-btn:focus-visible { background: var(--surface-2); outline: none; }
     .nav-btn[disabled] { opacity: .45; cursor: not-allowed; }
     .nav-btn .icon { width: 22px; text-align: center; }
+    /* ---------- Main Content Area ---------- */
     .main {
       min-width: 0;
       padding: 20px;
     }
+    /* ---------- Top Bar: Search, Theme, Language, Logout ---------- */
     .topbar {
       display: flex;
       gap: 10px;
@@ -124,6 +135,7 @@
       height: 42px;
       padding: 0 10px;
     }
+    /* ---------- Dashboard Page Header ---------- */
     .page-head {
       display: flex;
       align-items: start;
@@ -133,6 +145,7 @@
     }
     .page-head h2 { margin: 0; font-size: clamp(23px, 3vw, 32px); }
     .page-head p { margin: 6px 0 0; color: var(--muted); }
+    /* ---------- System Status Message ---------- */
     .status {
       padding: 12px 14px;
       border-radius: 12px;
@@ -146,11 +159,13 @@
       color: var(--danger);
     }
     .status[data-state="success"] { border-color: #bbf7d0; color: var(--success); }
+    /* ---------- Responsive Card Grid ---------- */
     .grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 14px;
     }
+    /* ---------- Reusable Card Component ---------- */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -176,6 +191,7 @@
       border-radius: 10px;
       padding: 16px;
     }
+    /* ---------- Module Card ---------- */
     .module-card {
       min-height: 150px;
       display: flex;
@@ -187,6 +203,7 @@
       gap: 8px;
       flex-wrap: wrap;
     }
+    /* ---------- Reusable Buttons ---------- */
     .btn {
       border: 1px solid var(--border);
       background: var(--surface);
@@ -200,6 +217,7 @@
       margin: 26px 0 12px;
       font-size: 18px;
     }
+    /* ---------- Footer ---------- */
     .footer {
       margin-top: 30px;
       padding: 18px 4px 8px;
@@ -218,10 +236,12 @@
       white-space: nowrap;
       border: 0;
     }
+    /* ---------- Tablet Layout ---------- */
     @media (max-width: 1050px) {
       .app { grid-template-columns: 220px 1fr; }
       .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
+    /* ---------- Mobile Layout ---------- */
     @media (max-width: 760px) {
       .app { display: block; }
       .sidebar {
@@ -237,6 +257,7 @@
       .topbar-left { flex: 1; }
       .grid { grid-template-columns: 1fr; }
     }
+    /* ---------- Print Layout ---------- */
     @media print {
       .sidebar, .topbar, .footer { display: none !important; }
       .main { padding: 0; }
@@ -245,13 +266,19 @@
   </style>
 </head>
 <body>
+  <!-- ============================================================
+       HTML BODY — Dashboard-এর দৃশ্যমান বাহিরের কাঠামো শুরু
+       ============================================================ -->
+  <!-- ===================== MAIN APP WRAPPER ===================== -->
   <div class="app" id="app" data-state="loading">
+    <!-- ===================== SIDEBAR / NAVIGATION ===================== -->
     <aside class="sidebar" aria-label="প্রধান নেভিগেশন">
       <div class="brand">
         <h1>DRS 2026</h1>
         <p id="school-name">School Management System</p>
       </div>
 
+      <!-- ---------- Core Modules ---------- -->
       <div class="nav-group">
         <div class="nav-label">Core</div>
         <button class="nav-btn" data-module="dashboard"><span class="icon">⌂</span>ড্যাশবোর্ড</button>
@@ -263,6 +290,7 @@
         <button class="nav-btn" data-module="notifications" disabled><span class="icon">🔔</span>Notifications</button>
       </div>
 
+      <!-- ---------- Operations Modules ---------- -->
       <div class="nav-group">
         <div class="nav-label">Operations</div>
         <button class="nav-btn" data-module="admission" disabled><span class="icon">＋</span>Admission</button>
@@ -270,13 +298,16 @@
         <button class="nav-btn" data-module="routine" disabled><span class="icon">◫</span>Routine Builder</button>
       </div>
 
+      <!-- ---------- Privileged / Security Modules ---------- -->
       <div class="nav-group">
         <div class="nav-label">Privileged</div>
         <button class="nav-btn" data-module="security" disabled><span class="icon">🔐</span>Security Center</button>
       </div>
     </aside>
 
+    <!-- ===================== MAIN CONTENT ===================== -->
     <main class="main">
+      <!-- ===================== TOP BAR ===================== -->
       <div class="topbar">
         <div class="topbar-left">
           <input id="command-search" class="search" type="search" placeholder="সার্চ / Ctrl+K" aria-label="সার্চ">
@@ -288,6 +319,7 @@
         </div>
       </div>
 
+      <!-- ===================== PAGE HEADER ===================== -->
       <section class="page-head">
         <div>
           <h2>ড্যাশবোর্ড</h2>
@@ -299,10 +331,12 @@
         </div>
       </section>
 
+      <!-- ===================== SYSTEM AUTH STATUS ===================== -->
       <div id="system-status" class="status" data-state="loading" role="status" aria-live="polite">
         সেশন ও বর্তমান সার্ভার-অথরাইজেশন যাচাই হচ্ছে…
       </div>
 
+      <!-- ===================== OVERVIEW / KPI CARDS ===================== -->
       <h3 class="section-title">Overview</h3>
       <section class="grid" aria-label="সারসংক্ষেপ">
         <article class="card"><h3>Students</h3><div class="metric">—</div><div class="muted">Server-authoritative data required</div></article>
@@ -311,6 +345,7 @@
         <article class="card"><h3>Payments</h3><div class="metric">—</div><div class="muted">Financial data never fabricated</div></article>
       </section>
 
+      <!-- ===================== CORE MODULE CARDS ===================== -->
       <h3 class="section-title">Core Modules</h3>
       <section class="grid" aria-label="মূল মডিউলসমূহ">
         <article class="card module-card">
@@ -357,6 +392,7 @@
         </article>
       </section>
 
+      <!-- ===================== SYSTEM HEALTH ===================== -->
       <h3 class="section-title">System Health</h3>
       <section class="card">
         <div class="empty" id="health-state">
@@ -364,6 +400,7 @@
         </div>
       </section>
 
+      <!-- ===================== FOOTER ===================== -->
       <div class="footer">
         <div>© DRS 2026 · Rowshan-Ara Secondary Girls' High School</div>
         <div>Developer: S. L. Protoay Kumar Halder · Assistant Teacher, ICT · Index N56913462</div>
@@ -371,7 +408,11 @@
     </main>
   </div>
 
+  <!-- ============================================================
+       JAVASCRIPT SECTION — Authentication, Theme, UI Behaviour
+       ============================================================ -->
   <script>
+    /* ---------- Supabase Client Configuration ---------- */
     const SUPABASE_URL = 'https://olpzkoqskwjpnhurtcnw.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'Sb_publishable_zcDTQb-eMY2HtCyfGppF_Q_Iw5cDwEM';
     const supabaseClient = supabase.createClient(
@@ -379,20 +420,24 @@
       SUPABASE_PUBLISHABLE_KEY
     );
 
+    /* ---------- Small DOM Helper ---------- */
     const $ = (id) => document.getElementById(id);
 
+    /* ---------- Update System Status UI ---------- */
     function setStatus(state, message) {
       const el = $('system-status');
       el.dataset.state = state;
       el.textContent = message;
     }
 
+    /* ---------- Light / Dark Theme Controller ---------- */
     function setTheme(theme) {
       document.documentElement.dataset.theme = theme;
       localStorage.setItem('drs-theme', theme);
       $('theme-toggle').textContent = theme === 'dark' ? '☀' : '☾';
     }
 
+    /* ---------- Require a Valid Supabase Session ---------- */
     async function requireAuthenticatedSession() {
       const { data: userData, error } = await supabaseClient.auth.getUser();
       if (error || !userData.user) {
@@ -402,6 +447,7 @@
       return userData.user;
     }
 
+    /* ---------- Dashboard Initialization ---------- */
     async function init() {
       try {
         const user = await requireAuthenticatedSession();
@@ -430,20 +476,24 @@
       }
     }
 
+    /* ---------- Logout ---------- */
     $('signout-btn').addEventListener('click', async () => {
       await supabaseClient.auth.signOut();
       window.location.replace('./index.html');
     });
 
+    /* ---------- Theme Toggle ---------- */
     $('theme-toggle').addEventListener('click', () => {
       const current = document.documentElement.dataset.theme || 'light';
       setTheme(current === 'dark' ? 'light' : 'dark');
     });
 
+    /* ---------- Language Toggle ---------- */
     $('lang-toggle').addEventListener('click', () => {
       $('lang-toggle').textContent = $('lang-toggle').textContent === 'EN' ? 'বাং' : 'EN';
     });
 
+    /* ---------- Command Search / Ctrl+K ---------- */
     $('command-search').addEventListener('keydown', (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
@@ -451,6 +501,7 @@
       }
     });
 
+    /* ---------- Global Keyboard Shortcut ---------- */
     window.addEventListener('keydown', (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
@@ -458,6 +509,7 @@
       }
     });
 
+    /* ---------- Restore Saved Theme and Start App ---------- */
     const savedTheme = localStorage.getItem('drs-theme');
     setTheme(savedTheme === 'dark' ? 'dark' : 'light');
     init();
