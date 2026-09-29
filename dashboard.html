@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <title>DRS 2026 — Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --surface-2: #f8fafc;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --danger: #b91c1c;
+      --success: #15803d;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+    [data-theme="dark"] {
+      --bg: #0b1220;
+      --surface: #111827;
+      --surface-2: #172033;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: #263244;
+      --primary: #60a5fa;
+      --danger: #f87171;
+      --success: #4ade80;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans Bengali", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+    }
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 20px 16px;
+    }
+    .brand {
+      padding: 8px 10px 18px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .brand h1 { margin: 0; font-size: 20px; }
+    .brand p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+    .nav-group { margin-top: 14px; }
+    .nav-label {
+      padding: 7px 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .nav-btn {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      padding: 11px 12px;
+      border-radius: 10px;
+      margin: 2px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-btn:hover, .nav-btn:focus-visible { background: var(--surface-2); outline: none; }
+    .nav-btn[disabled] { opacity: .45; cursor: not-allowed; }
+    .nav-btn .icon { width: 22px; text-align: center; }
+    .main {
+      min-width: 0;
+      padding: 20px;
+    }
+    .topbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(8px);
+      padding: 6px 0;
+    }
+    .topbar-left, .topbar-right { display: flex; align-items: center; gap: 8px; }
+    .search {
+      min-width: 180px;
+      width: min(420px, 48vw);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 10px;
+    }
+    .icon-btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 10px;
+      min-width: 42px;
+      height: 42px;
+      padding: 0 10px;
+    }
+    .page-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .page-head h2 { margin: 0; font-size: clamp(23px, 3vw, 32px); }
+    .page-head p { margin: 6px 0 0; color: var(--muted); }
+    .status {
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      margin-bottom: 18px;
+    }
+    .status[data-state="loading"] { border-color: #f59e0b; }
+    .status[data-state="denied"], .status[data-state="error"] {
+      border-color: #fecaca;
+      color: var(--danger);
+    }
+    .status[data-state="success"] { border-color: #bbf7d0; color: var(--success); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      min-width: 0;
+    }
+    .card h3 { margin: 0 0 7px; font-size: 16px; }
+    .muted { color: var(--muted); }
+    .metric {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+    }
+    .empty {
+      min-height: 120px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      background: var(--surface-2);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .module-card {
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .module-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 9px;
+      padding: 9px 12px;
+    }
+    .btn.primary { background: var(--primary); color: white; border-color: var(--primary); }
+    .btn[disabled] { opacity: .45; cursor: not-allowed; }
+    .section-title {
+      margin: 26px 0 12px;
+      font-size: 18px;
+    }
+    .footer {
+      margin-top: 30px;
+      padding: 18px 4px 8px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+    @media (max-width: 1050px) {
+      .app { grid-template-columns: 220px 1fr; }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 760px) {
+      .app { display: block; }
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .main { padding: 14px; }
+      .topbar { position: static; }
+      .page-head { flex-direction: column; }
+      .search { width: 100%; }
+      .topbar-left { flex: 1; }
+      .grid { grid-template-columns: 1fr; }
+    }
+    @media print {
+      .sidebar, .topbar, .footer { display: none !important; }
+      .main { padding: 0; }
+      body { background: white; color: black; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app" data-state="loading">
+    <aside class="sidebar" aria-label="প্রধান নেভিগেশন">
+      <div class="brand">
+        <h1>DRS 2026</h1>
+        <p id="school-name">School Management System</p>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label">Core</div>
+        <button class="nav-btn" data-module="dashboard"><span class="icon">⌂</span>ড্যাশবোর্ড</button>
+        <button class="nav-btn" data-module="students" disabled><span class="icon">👤</span>Student 360°</button>
+        <button class="nav-btn" data-module="attendance" disabled><span class="icon">✓</span>Attendance</button>
+        <button class="nav-btn" data-module="exams" disabled><span class="icon">▣</span>Exams & Results</button>
+        <button class="nav-btn" data-module="payments" disabled><span class="icon">৳</span>Payments</button>
+        <button class="nav-btn" data-module="documents" disabled><span class="icon">▤</span>Documents & QR</button>
+        <button class="nav-btn" data-module="notifications" disabled><span class="icon">🔔</span>Notifications</button>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label">Operations</div>
+        <button class="nav-btn" data-module="admission" disabled><span class="icon">＋</span>Admission</button>
+        <button class="nav-btn" data-module="bulk" disabled><span class="icon">⇅</span>Bulk Import / Demo</button>
+        <button class="nav-btn" data-module="routine" disabled><span class="icon">◫</span>Routine Builder</button>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label">Privileged</div>
+        <button class="nav-btn" data-module="security" disabled><span class="icon">🔐</span>Security Center</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <input id="command-search" class="search" type="search" placeholder="সার্চ / Ctrl+K" aria-label="সার্চ">
+        </div>
+        <div class="topbar-right">
+          <button id="theme-toggle" class="icon-btn" type="button" aria-label="থিম পরিবর্তন">☾</button>
+          <button id="lang-toggle" class="icon-btn" type="button" aria-label="ভাষা পরিবর্তন">EN</button>
+          <button id="signout-btn" class="icon-btn" type="button" aria-label="লগআউট">⇥</button>
+        </div>
+      </div>
+
+      <section class="page-head">
+        <div>
+          <h2>ড্যাশবোর্ড</h2>
+          <p id="welcome-line">সেশন ও অনুমতি যাচাই হচ্ছে…</p>
+        </div>
+        <div class="card" style="padding:10px 12px; box-shadow:none;">
+          <div class="muted" style="font-size:12px;">Role</div>
+          <strong id="role-display">যাচাই চলছে…</strong>
+        </div>
+      </section>
+
+      <div id="system-status" class="status" data-state="loading" role="status" aria-live="polite">
+        সেশন ও বর্তমান সার্ভার-অথরাইজেশন যাচাই হচ্ছে…
+      </div>
+
+      <h3 class="section-title">Overview</h3>
+      <section class="grid" aria-label="সারসংক্ষেপ">
+        <article class="card"><h3>Students</h3><div class="metric">—</div><div class="muted">Server-authoritative data required</div></article>
+        <article class="card"><h3>Attendance</h3><div class="metric">—</div><div class="muted">No mock production metrics</div></article>
+        <article class="card"><h3>Pending Reviews</h3><div class="metric">—</div><div class="muted">Awaiting authorized query</div></article>
+        <article class="card"><h3>Payments</h3><div class="metric">—</div><div class="muted">Financial data never fabricated</div></article>
+      </section>
+
+      <h3 class="section-title">Core Modules</h3>
+      <section class="grid" aria-label="মূল মডিউলসমূহ">
+        <article class="card module-card">
+          <div>
+            <h3>Student 360°</h3>
+            <p class="muted">Academic, attendance, payment and promotion history with scope-controlled access.</p>
+          </div>
+          <div class="module-actions"><button class="btn" disabled>Open</button></div>
+        </article>
+        <article class="card module-card">
+          <div>
+            <h3>Attendance</h3>
+            <p class="muted">Daily and subject-wise attendance with the two independent authorization scopes.</p>
+          </div>
+          <div class="module-actions"><button class="btn" disabled>Open</button></div>
+        </article>
+        <article class="card module-card">
+          <div>
+            <h3>Exams & Results</h3>
+            <p class="muted">Draft → Review → Publish → Lock; policy-sensitive transitions remain server-authorized.</p>
+          </div>
+          <div class="module-actions"><button class="btn" disabled>Open</button></div>
+        </article>
+        <article class="card module-card">
+          <div>
+            <h3>Payments</h3>
+            <p class="muted">Gateway and Cash Receive paths with duplicate settlement protection and audit.</p>
+          </div>
+          <div class="module-actions"><button class="btn" disabled>Open</button></div>
+        </article>
+        <article class="card module-card">
+          <div>
+            <h3>Documents & QR</h3>
+            <p class="muted">Official document generation/verification with server-authoritative canonical payloads.</p>
+          </div>
+          <div class="module-actions"><button class="btn" disabled>Open</button></div>
+        </article>
+        <article class="card module-card">
+          <div>
+            <h3>Notifications</h3>
+            <p class="muted">In-app / Web Push / Email / optional channels; never blocks Core transactions.</p>
+          </div>
+          <div class="module-actions"><button class="btn" disabled>Open</button></div>
+        </article>
+      </section>
+
+      <h3 class="section-title">System Health</h3>
+      <section class="card">
+        <div class="empty" id="health-state">
+          স্বাস্থ্য-পর্যবেক্ষণ সংযোগ চালু হওয়ার অপেক্ষায়। এটি observer-only; provider state-ই authoritative।
+        </div>
+      </section>
+
+      <div class="footer">
+        <div>© DRS 2026 · Rowshan-Ara Secondary Girls' High School</div>
+        <div>Developer: S. L. Protoay Kumar Halder · Assistant Teacher, ICT · Index N56913462</div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://olpzkoqskwjpnhurtcnw.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'Sb_publishable_zcDTQb-eMY2HtCyfGppF_Q_Iw5cDwEM';
+    const supabaseClient = supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
+    const $ = (id) => document.getElementById(id);
+
+    function setStatus(state, message) {
+      const el = $('system-status');
+      el.dataset.state = state;
+      el.textContent = message;
+    }
+
+    function setTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      localStorage.setItem('drs-theme', theme);
+      $('theme-toggle').textContent = theme === 'dark' ? '☀' : '☾';
+    }
+
+    async function requireAuthenticatedSession() {
+      const { data: userData, error } = await supabaseClient.auth.getUser();
+      if (error || !userData.user) {
+        window.location.replace('./index.html');
+        return null;
+      }
+      return userData.user;
+    }
+
+    async function init() {
+      try {
+        const user = await requireAuthenticatedSession();
+        if (!user) return;
+
+        $('welcome-line').textContent = `Signed in: ${user.email || 'authenticated user'}`;
+
+        /*
+          Current role is intentionally NOT inferred from JWT/custom claims,
+          local storage, or client-side metadata. A server-authoritative
+          profile/RPC integration must be wired only after the actual schema
+          and RLS/RPC contract are verified from the project.
+        */
+        $('role-display').textContent = 'Server verification required';
+        setStatus(
+          'denied',
+          'সেশন বৈধ। কিন্তু বর্তমান role/scope server-side authority থেকে যাচাই না হওয়া পর্যন্ত privileged modules সক্রিয় করা হবে না।'
+        );
+
+        document.querySelectorAll('.nav-btn[data-module]:not([data-module="dashboard"])')
+          .forEach(btn => { btn.disabled = true; });
+
+      } catch (err) {
+        console.error(err);
+        setStatus('error', 'সিস্টেম যাচাই ব্যর্থ হয়েছে। নিরাপত্তার জন্য privileged access বন্ধ রাখা হয়েছে।');
+      }
+    }
+
+    $('signout-btn').addEventListener('click', async () => {
+      await supabaseClient.auth.signOut();
+      window.location.replace('./index.html');
+    });
+
+    $('theme-toggle').addEventListener('click', () => {
+      const current = document.documentElement.dataset.theme || 'light';
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+
+    $('lang-toggle').addEventListener('click', () => {
+      $('lang-toggle').textContent = $('lang-toggle').textContent === 'EN' ? 'বাং' : 'EN';
+    });
+
+    $('command-search').addEventListener('keydown', (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        event.target.focus();
+      }
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        $('command-search').focus();
+      }
+    });
+
+    const savedTheme = localStorage.getItem('drs-theme');
+    setTheme(savedTheme === 'dark' ? 'dark' : 'light');
+    init();
+  </script>
+</body>
+</html>
