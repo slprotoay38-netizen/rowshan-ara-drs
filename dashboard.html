@@ -8,10 +8,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <style>
-    /* ============================================================
-       CSS SECTION — পুরো Dashboard-এর বাহিরের/ভিজ্যুয়াল ডিজাইন
-       ============================================================ */
-    /* ---------- Light Theme Variables ---------- */
     :root {
       --bg: #f1f5f9;
       --surface: #ffffff;
@@ -24,7 +20,6 @@
       --success: #15803d;
       --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
     }
-    /* ---------- Dark Theme Variables ---------- */
     [data-theme="dark"] {
       --bg: #0b1220;
       --surface: #111827;
@@ -47,13 +42,11 @@
     }
     button, input { font: inherit; }
     button { cursor: pointer; }
-    /* ---------- Main Application Layout ---------- */
     .app {
       min-height: 100vh;
       display: grid;
       grid-template-columns: 280px 1fr;
     }
-    /* ---------- Left Sidebar / Navigation ---------- */
     .sidebar {
       position: sticky;
       top: 0;
@@ -63,7 +56,6 @@
       border-right: 1px solid var(--border);
       padding: 20px 16px;
     }
-    /* ---------- School / System Branding ---------- */
     .brand {
       padding: 8px 10px 18px;
       border-bottom: 1px solid var(--border);
@@ -71,7 +63,6 @@
     }
     .brand h1 { margin: 0; font-size: 20px; }
     .brand p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
-    /* ---------- Navigation Groups ---------- */
     .nav-group { margin-top: 14px; }
     .nav-label {
       padding: 7px 10px;
@@ -97,12 +88,10 @@
     .nav-btn:hover, .nav-btn:focus-visible { background: var(--surface-2); outline: none; }
     .nav-btn[disabled] { opacity: .45; cursor: not-allowed; }
     .nav-btn .icon { width: 22px; text-align: center; }
-    /* ---------- Main Content Area ---------- */
     .main {
       min-width: 0;
       padding: 20px;
     }
-    /* ---------- Top Bar: Search, Theme, Language, Logout ---------- */
     .topbar {
       display: flex;
       gap: 10px;
@@ -135,7 +124,6 @@
       height: 42px;
       padding: 0 10px;
     }
-    /* ---------- Dashboard Page Header ---------- */
     .page-head {
       display: flex;
       align-items: start;
@@ -145,7 +133,6 @@
     }
     .page-head h2 { margin: 0; font-size: clamp(23px, 3vw, 32px); }
     .page-head p { margin: 6px 0 0; color: var(--muted); }
-    /* ---------- System Status Message ---------- */
     .status {
       padding: 12px 14px;
       border-radius: 12px;
@@ -159,13 +146,11 @@
       color: var(--danger);
     }
     .status[data-state="success"] { border-color: #bbf7d0; color: var(--success); }
-    /* ---------- Responsive Card Grid ---------- */
     .grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 14px;
     }
-    /* ---------- Reusable Card Component ---------- */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -191,7 +176,6 @@
       border-radius: 10px;
       padding: 16px;
     }
-    /* ---------- Module Card ---------- */
     .module-card {
       min-height: 150px;
       display: flex;
@@ -203,7 +187,6 @@
       gap: 8px;
       flex-wrap: wrap;
     }
-    /* ---------- Reusable Buttons ---------- */
     .btn {
       border: 1px solid var(--border);
       background: var(--surface);
@@ -217,7 +200,6 @@
       margin: 26px 0 12px;
       font-size: 18px;
     }
-    /* ---------- Footer ---------- */
     .footer {
       margin-top: 30px;
       padding: 18px 4px 8px;
@@ -225,6 +207,33 @@
       color: var(--muted);
       font-size: 13px;
     }
+    .metric.loading { opacity: .55; }
+    .metric.muted-value { color: var(--muted); }
+    .health-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .health-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      font-size: 12px;
+    }
+    .health-pill.ok { color: var(--success); border-color: #bbf7d0; }
+    .health-pill.bad { color: var(--danger); border-color: #fecaca; }
+    .module-card[data-search-hidden="true"] { display: none; }
+    .chart-wrap {
+      min-height: 260px;
+      position: relative;
+    }
+    .small-note { font-size: 12px; color: var(--muted); margin-top: 8px; }
     .sr-only {
       position: absolute;
       width: 1px;
@@ -236,12 +245,10 @@
       white-space: nowrap;
       border: 0;
     }
-    /* ---------- Tablet Layout ---------- */
     @media (max-width: 1050px) {
       .app { grid-template-columns: 220px 1fr; }
       .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
-    /* ---------- Mobile Layout ---------- */
     @media (max-width: 760px) {
       .app { display: block; }
       .sidebar {
@@ -257,7 +264,6 @@
       .topbar-left { flex: 1; }
       .grid { grid-template-columns: 1fr; }
     }
-    /* ---------- Print Layout ---------- */
     @media print {
       .sidebar, .topbar, .footer { display: none !important; }
       .main { padding: 0; }
@@ -266,19 +272,13 @@
   </style>
 </head>
 <body>
-  <!-- ============================================================
-       HTML BODY — Dashboard-এর দৃশ্যমান বাহিরের কাঠামো শুরু
-       ============================================================ -->
-  <!-- ===================== MAIN APP WRAPPER ===================== -->
   <div class="app" id="app" data-state="loading">
-    <!-- ===================== SIDEBAR / NAVIGATION ===================== -->
     <aside class="sidebar" aria-label="প্রধান নেভিগেশন">
       <div class="brand">
         <h1>DRS 2026</h1>
         <p id="school-name">School Management System</p>
       </div>
 
-      <!-- ---------- Core Modules ---------- -->
       <div class="nav-group">
         <div class="nav-label">Core</div>
         <button class="nav-btn" data-module="dashboard"><span class="icon">⌂</span>ড্যাশবোর্ড</button>
@@ -290,7 +290,6 @@
         <button class="nav-btn" data-module="notifications" disabled><span class="icon">🔔</span>Notifications</button>
       </div>
 
-      <!-- ---------- Operations Modules ---------- -->
       <div class="nav-group">
         <div class="nav-label">Operations</div>
         <button class="nav-btn" data-module="admission" disabled><span class="icon">＋</span>Admission</button>
@@ -298,16 +297,13 @@
         <button class="nav-btn" data-module="routine" disabled><span class="icon">◫</span>Routine Builder</button>
       </div>
 
-      <!-- ---------- Privileged / Security Modules ---------- -->
       <div class="nav-group">
         <div class="nav-label">Privileged</div>
         <button class="nav-btn" data-module="security" disabled><span class="icon">🔐</span>Security Center</button>
       </div>
     </aside>
 
-    <!-- ===================== MAIN CONTENT ===================== -->
     <main class="main">
-      <!-- ===================== TOP BAR ===================== -->
       <div class="topbar">
         <div class="topbar-left">
           <input id="command-search" class="search" type="search" placeholder="সার্চ / Ctrl+K" aria-label="সার্চ">
@@ -319,7 +315,6 @@
         </div>
       </div>
 
-      <!-- ===================== PAGE HEADER ===================== -->
       <section class="page-head">
         <div>
           <h2>ড্যাশবোর্ড</h2>
@@ -331,59 +326,83 @@
         </div>
       </section>
 
-      <!-- ===================== SYSTEM AUTH STATUS ===================== -->
       <div id="system-status" class="status" data-state="loading" role="status" aria-live="polite">
         সেশন ও বর্তমান সার্ভার-অথরাইজেশন যাচাই হচ্ছে…
       </div>
 
-      <!-- ===================== OVERVIEW / KPI CARDS ===================== -->
       <h3 class="section-title">Overview</h3>
       <section class="grid" aria-label="সারসংক্ষেপ">
-        <article class="card"><h3>Students</h3><div class="metric">—</div><div class="muted">Server-authoritative data required</div></article>
-        <article class="card"><h3>Attendance</h3><div class="metric">—</div><div class="muted">No mock production metrics</div></article>
-        <article class="card"><h3>Pending Reviews</h3><div class="metric">—</div><div class="muted">Awaiting authorized query</div></article>
-        <article class="card"><h3>Payments</h3><div class="metric">—</div><div class="muted">Financial data never fabricated</div></article>
+        <article class="card">
+          <h3>Students</h3>
+          <div id="metric-students" class="metric loading">…</div>
+          <div id="metric-students-note" class="muted">Server RPC থেকে আসছে</div>
+        </article>
+        <article class="card">
+          <h3>Results</h3>
+          <div id="metric-results" class="metric loading">…</div>
+          <div id="metric-results-note" class="muted">Server RPC থেকে আসছে</div>
+        </article>
+        <article class="card">
+          <h3>Attendance</h3>
+          <div id="metric-attendance" class="metric loading">…</div>
+          <div id="metric-attendance-note" class="muted">যদি backend-এ available থাকে</div>
+        </article>
+        <article class="card">
+          <h3>Payments</h3>
+          <div id="metric-payments" class="metric loading">…</div>
+          <div id="metric-payments-note" class="muted">Financial data কখনো mock করা হবে না</div>
+        </article>
       </section>
 
-      <!-- ===================== CORE MODULE CARDS ===================== -->
+      <h3 class="section-title">Dashboard Data</h3>
+      <section class="card">
+        <div class="health-row">
+          <div>
+            <strong>Server-authoritative summary</strong>
+            <div id="summary-note" class="small-note">drs_dashboard_summary RPC যাচাই করা হচ্ছে…</div>
+          </div>
+          <button id="refresh-dashboard" class="btn primary" type="button">Refresh</button>
+        </div>
+      </section>
+
       <h3 class="section-title">Core Modules</h3>
       <section class="grid" aria-label="মূল মডিউলসমূহ">
-        <article class="card module-card">
+        <article class="card module-card" data-module-label="student 360 student profile academic attendance payment promotion">
           <div>
             <h3>Student 360°</h3>
             <p class="muted">Academic, attendance, payment and promotion history with scope-controlled access.</p>
           </div>
           <div class="module-actions"><button class="btn" disabled>Open</button></div>
         </article>
-        <article class="card module-card">
+        <article class="card module-card" data-module-label="attendance daily subject class section">
           <div>
             <h3>Attendance</h3>
             <p class="muted">Daily and subject-wise attendance with the two independent authorization scopes.</p>
           </div>
           <div class="module-actions"><button class="btn" disabled>Open</button></div>
         </article>
-        <article class="card module-card">
+        <article class="card module-card" data-module-label="exams results marksheet admit card promotion">
           <div>
             <h3>Exams & Results</h3>
             <p class="muted">Draft → Review → Publish → Lock; policy-sensitive transitions remain server-authorized.</p>
           </div>
           <div class="module-actions"><button class="btn" disabled>Open</button></div>
         </article>
-        <article class="card module-card">
+        <article class="card module-card" data-module-label="payments fees cash gateway bKash Nagad SSLCOMMERZ">
           <div>
             <h3>Payments</h3>
             <p class="muted">Gateway and Cash Receive paths with duplicate settlement protection and audit.</p>
           </div>
           <div class="module-actions"><button class="btn" disabled>Open</button></div>
         </article>
-        <article class="card module-card">
+        <article class="card module-card" data-module-label="documents qr official verification">
           <div>
             <h3>Documents & QR</h3>
             <p class="muted">Official document generation/verification with server-authoritative canonical payloads.</p>
           </div>
           <div class="module-actions"><button class="btn" disabled>Open</button></div>
         </article>
-        <article class="card module-card">
+        <article class="card module-card" data-module-label="notifications web push email sms whatsapp">
           <div>
             <h3>Notifications</h3>
             <p class="muted">In-app / Web Push / Email / optional channels; never blocks Core transactions.</p>
@@ -392,15 +411,15 @@
         </article>
       </section>
 
-      <!-- ===================== SYSTEM HEALTH ===================== -->
       <h3 class="section-title">System Health</h3>
       <section class="card">
-        <div class="empty" id="health-state">
-          স্বাস্থ্য-পর্যবেক্ষণ সংযোগ চালু হওয়ার অপেক্ষায়। এটি observer-only; provider state-ই authoritative।
+        <div class="health-row">
+          <div id="health-state" class="health-pill">Backend health যাচাই হচ্ছে…</div>
+          <button id="refresh-health" class="btn" type="button">Check health</button>
         </div>
+        <div id="health-note" class="small-note">Observer-only: provider/backend response-ই authoritative; এখানে কোনো health state লেখা হয় না।</div>
       </section>
 
-      <!-- ===================== FOOTER ===================== -->
       <div class="footer">
         <div>© DRS 2026 · Rowshan-Ara Secondary Girls' High School</div>
         <div>Developer: S. L. Protoay Kumar Halder · Assistant Teacher, ICT · Index N56913462</div>
@@ -408,11 +427,14 @@
     </main>
   </div>
 
-  <!-- ============================================================
-       JAVASCRIPT SECTION — Authentication, Theme, UI Behaviour
-       ============================================================ -->
   <script>
-    /* ---------- Supabase Client Configuration ---------- */
+    /* ============================================================
+       DRS 2026 Dashboard
+       - Authentication is verified with Supabase Auth.
+       - Dashboard metrics come only from server RPCs.
+       - No role is inferred from localStorage/JWT metadata.
+       - No client-side authorization bypass is added here.
+       ============================================================ */
     const SUPABASE_URL = 'https://olpzkoqskwjpnhurtcnw.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'Sb_publishable_zcDTQb-eMY2HtCyfGppF_Q_Iw5cDwEM';
     const supabaseClient = supabase.createClient(
@@ -420,24 +442,90 @@
       SUPABASE_PUBLISHABLE_KEY
     );
 
-    /* ---------- Small DOM Helper ---------- */
     const $ = (id) => document.getElementById(id);
 
-    /* ---------- Update System Status UI ---------- */
     function setStatus(state, message) {
       const el = $('system-status');
       el.dataset.state = state;
       el.textContent = message;
     }
 
-    /* ---------- Light / Dark Theme Controller ---------- */
     function setTheme(theme) {
       document.documentElement.dataset.theme = theme;
       localStorage.setItem('drs-theme', theme);
       $('theme-toggle').textContent = theme === 'dark' ? '☀' : '☾';
     }
 
-    /* ---------- Require a Valid Supabase Session ---------- */
+    function setMetric(id, value, noteId, note) {
+      const el = $(id);
+      if (!el) return;
+      el.classList.remove('loading');
+      if (value === null || value === undefined || value === '') {
+        el.textContent = '—';
+        el.classList.add('muted-value');
+      } else {
+        el.textContent = formatValue(value);
+        el.classList.remove('muted-value');
+      }
+      if (noteId && $(noteId) && note) $(noteId).textContent = note;
+    }
+
+    function formatValue(value) {
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        return new Intl.NumberFormat('en-US').format(value);
+      }
+      if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+      return String(value);
+    }
+
+    function parseRpcPayload(value) {
+      if (value == null) return null;
+      if (typeof value === 'string') {
+        try { return JSON.parse(value); } catch (_) { return value; }
+      }
+      return value;
+    }
+
+    function firstDefined(obj, keys) {
+      if (!obj || typeof obj !== 'object') return undefined;
+      for (const key of keys) {
+        if (Object.prototype.hasOwnProperty.call(obj, key) && obj[key] !== null && obj[key] !== undefined) {
+          return obj[key];
+        }
+      }
+      return undefined;
+    }
+
+    function numericFrom(value) {
+      if (typeof value === 'number' && Number.isFinite(value)) return value;
+      if (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value))) return Number(value);
+      if (value && typeof value === 'object') {
+        const nested = firstDefined(value, ['count', 'total', 'value', 'amount']);
+        return numericFrom(nested);
+      }
+      return undefined;
+    }
+
+    function metricFromSummary(summary, keys) {
+      const raw = firstDefined(summary, keys);
+      return numericFrom(raw);
+    }
+
+    function roleFromSummary(summary) {
+      const role = firstDefined(summary, ['role', 'account_role', 'user_role']);
+      return typeof role === 'string' && role.trim() ? role.trim().toLowerCase() : null;
+    }
+
+    function applyServerRole(summary) {
+      const role = roleFromSummary(summary);
+      if (!role) {
+        $('role-display').textContent = 'Server verification required';
+        return null;
+      }
+      $('role-display').textContent = role.replace(/_/g, ' ');
+      return role;
+    }
+
     async function requireAuthenticatedSession() {
       const { data: userData, error } = await supabaseClient.auth.getUser();
       if (error || !userData.user) {
@@ -447,53 +535,149 @@
       return userData.user;
     }
 
-    /* ---------- Dashboard Initialization ---------- */
+    async function loadDashboardSummary() {
+      const { data, error } = await supabaseClient.rpc('drs_dashboard_summary');
+      if (error) throw error;
+      return parseRpcPayload(data) || {};
+    }
+
+    async function loadBackendHealth() {
+      const { data, error } = await supabaseClient.rpc('drs_backend_health');
+      if (error) throw error;
+      return parseRpcPayload(data);
+    }
+
+    function renderSummary(summary) {
+      const students = metricFromSummary(summary, ['students', 'student_count', 'students_count']);
+      const results = metricFromSummary(summary, ['results', 'result_count', 'results_count']);
+      const attendance = metricFromSummary(summary, ['attendance', 'attendance_count', 'attendance_records']);
+      const payments = metricFromSummary(summary, ['payments', 'payment_count', 'payments_count']);
+      const pending = metricFromSummary(summary, ['pending_reviews', 'pending', 'pending_count', 'reviews_pending']);
+
+      setMetric('metric-students', students, 'metric-students-note', students === undefined ? 'Backend summary-তে field নেই' : 'Server RPC থেকে পাওয়া');
+      setMetric('metric-results', results, 'metric-results-note', results === undefined ? 'Backend summary-তে field নেই' : 'Server RPC থেকে পাওয়া');
+      setMetric('metric-attendance', attendance, 'metric-attendance-note', attendance === undefined ? 'বর্তমান RPC-তে সংখ্যা পাওয়া যায়নি' : 'Server RPC থেকে পাওয়া');
+      setMetric('metric-payments', payments, 'metric-payments-note', payments === undefined ? 'বর্তমান RPC-তে সংখ্যা পাওয়া যায়নি' : 'Server RPC থেকে পাওয়া');
+
+      if (pending !== undefined) {
+        $('summary-note').textContent = `Summary loaded. Pending reviews: ${formatValue(pending)}.`;
+      } else {
+        $('summary-note').textContent = 'Summary loaded from drs_dashboard_summary. Unavailable fields remain blank; no mock values are inserted.';
+      }
+
+      return applyServerRole(summary);
+    }
+
+    function renderHealth(payload) {
+      const el = $('health-state');
+      const note = $('health-note');
+      const raw = payload && typeof payload === 'object' ? payload : null;
+      const ok = raw ? firstDefined(raw, ['ok', 'healthy', 'status']) : null;
+
+      if (ok === true || ok === 'ok' || ok === 'healthy') {
+        el.className = 'health-pill ok';
+        el.textContent = '● Backend healthy';
+        note.textContent = 'drs_backend_health RPC সফলভাবে উত্তর দিয়েছে।';
+      } else if (ok === false || ok === 'error' || ok === 'unhealthy') {
+        el.className = 'health-pill bad';
+        el.textContent = '● Backend reported a problem';
+        note.textContent = 'Backend health response এসেছে; details client-side authorization ছাড়া দেখানো হচ্ছে না।';
+      } else {
+        el.className = 'health-pill';
+        el.textContent = '● Health response received';
+        note.textContent = 'Health RPC উত্তর দিয়েছে; response format-এ explicit ok/healthy field পাওয়া যায়নি।';
+      }
+    }
+
+    async function refreshDashboard() {
+      setStatus('loading', 'সেশন বৈধ। Server-authoritative dashboard data যাচাই করা হচ্ছে…');
+      $('refresh-dashboard').disabled = true;
+      try {
+        const summary = await loadDashboardSummary();
+        renderSummary(summary);
+        setStatus('success', 'ড্যাশবোর্ডের summary server RPC থেকে সফলভাবে লোড হয়েছে।');
+      } catch (err) {
+        console.error('drs_dashboard_summary failed', err);
+        $('summary-note').textContent = 'Dashboard summary RPC পাওয়া যায়নি বা ব্যর্থ হয়েছে। কোনো mock value দেখানো হবে না।';
+        setMetric('metric-students', null, 'metric-students-note', 'ডেটা unavailable');
+        setMetric('metric-results', null, 'metric-results-note', 'ডেটা unavailable');
+        setMetric('metric-attendance', null, 'metric-attendance-note', 'ডেটা unavailable');
+        setMetric('metric-payments', null, 'metric-payments-note', 'ডেটা unavailable');
+        setStatus('error', 'Dashboard summary server-side verification ব্যর্থ হয়েছে। নিরাপত্তার জন্য privileged access বন্ধ রাখা হয়েছে।');
+      } finally {
+        $('refresh-dashboard').disabled = false;
+      }
+    }
+
+    async function refreshHealth() {
+      $('refresh-health').disabled = true;
+      const el = $('health-state');
+      el.className = 'health-pill';
+      el.textContent = '● Checking…';
+      try {
+        const health = await loadBackendHealth();
+        renderHealth(health);
+      } catch (err) {
+        console.error('drs_backend_health failed', err);
+        el.className = 'health-pill bad';
+        el.textContent = '● Health check unavailable';
+        $('health-note').textContent = 'Backend health RPC ব্যর্থ হয়েছে। এটি observer-only; কোনো fallback health state অনুমান করা হয়নি।';
+      } finally {
+        $('refresh-health').disabled = false;
+      }
+    }
+
     async function init() {
       try {
         const user = await requireAuthenticatedSession();
         if (!user) return;
 
         $('welcome-line').textContent = `Signed in: ${user.email || 'authenticated user'}`;
+        $('role-display').textContent = 'Server verification required';
 
         /*
-          Current role is intentionally NOT inferred from JWT/custom claims,
-          local storage, or client-side metadata. A server-authoritative
-          profile/RPC integration must be wired only after the actual schema
-          and RLS/RPC contract are verified from the project.
+          IMPORTANT:
+          The browser never invents or upgrades a role. A role is accepted only
+          when the existing server-authoritative dashboard RPC explicitly returns it.
+          Module buttons remain disabled because their actual screens/actions are not
+          present in this dashboard file yet; enabling them would create dead/unsafe UI.
         */
-        $('role-display').textContent = 'Server verification required';
-        setStatus(
-          'denied',
-          'সেশন বৈধ। কিন্তু বর্তমান role/scope server-side authority থেকে যাচাই না হওয়া পর্যন্ত privileged modules সক্রিয় করা হবে না।'
-        );
-
         document.querySelectorAll('.nav-btn[data-module]:not([data-module="dashboard"])')
           .forEach(btn => { btn.disabled = true; });
 
+        await refreshDashboard();
+        await refreshHealth();
       } catch (err) {
         console.error(err);
         setStatus('error', 'সিস্টেম যাচাই ব্যর্থ হয়েছে। নিরাপত্তার জন্য privileged access বন্ধ রাখা হয়েছে।');
       }
     }
 
-    /* ---------- Logout ---------- */
     $('signout-btn').addEventListener('click', async () => {
       await supabaseClient.auth.signOut();
       window.location.replace('./index.html');
     });
 
-    /* ---------- Theme Toggle ---------- */
     $('theme-toggle').addEventListener('click', () => {
       const current = document.documentElement.dataset.theme || 'light';
       setTheme(current === 'dark' ? 'light' : 'dark');
     });
 
-    /* ---------- Language Toggle ---------- */
     $('lang-toggle').addEventListener('click', () => {
       $('lang-toggle').textContent = $('lang-toggle').textContent === 'EN' ? 'বাং' : 'EN';
     });
 
-    /* ---------- Command Search / Ctrl+K ---------- */
+    $('refresh-dashboard').addEventListener('click', refreshDashboard);
+    $('refresh-health').addEventListener('click', refreshHealth);
+
+    $('command-search').addEventListener('input', (event) => {
+      const query = event.target.value.trim().toLowerCase();
+      document.querySelectorAll('.module-card[data-module-label]').forEach(card => {
+        const haystack = card.getAttribute('data-module-label') || '';
+        card.dataset.searchHidden = query && !haystack.includes(query) ? 'true' : 'false';
+      });
+    });
+
     $('command-search').addEventListener('keydown', (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
@@ -501,7 +685,6 @@
       }
     });
 
-    /* ---------- Global Keyboard Shortcut ---------- */
     window.addEventListener('keydown', (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
@@ -509,7 +692,11 @@
       }
     });
 
-    /* ---------- Restore Saved Theme and Start App ---------- */
+    window.addEventListener('online', () => {
+      refreshDashboard();
+      refreshHealth();
+    });
+
     const savedTheme = localStorage.getItem('drs-theme');
     setTheme(savedTheme === 'dark' ? 'dark' : 'light');
     init();
